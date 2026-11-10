@@ -58,6 +58,7 @@
     "export": "slidev export deck/slides.md --output folien.pdf",
     "export:klicks": "slidev export deck/slides.md --with-clicks --output folien-klicks.pdf",
     "vorschau": "slidev export deck/slides.md --format png --output .slidev/vorschau",
+    "vorschau:bild": "node scripts/vorschau-bild.mjs",
     "check": "node bin/check.mjs deck/slides.md --self",
     "test": "node --test \"test/*.test.mjs\""
   },
