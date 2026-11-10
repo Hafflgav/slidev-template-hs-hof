@@ -61,17 +61,19 @@ Berechnet nach WCAG 2.2. Das Template nutzt nur Paare, die 4,5 : 1 erreichen.
 
 Vermieden werden Weiß auf Rot (4,46), Schwarz auf Blau (4,22) sowie Gelb und Grün als Textfarbe (unter 2 : 1). Text steht nie auf überlappenden Flächen.
 
+Grauer Nebentext (`#575757`, etwa Bildquellen) erreicht auf Grün nur 3,90, auf Rot 1,62 und auf Blau 1,45. Auf allen kräftigen Flächen, auch auf Gelb, nimmt er deshalb die Textfarbe der Fläche an (`styles/theme.css`).
+
 ### Schrift und Formen
 
 | Element | Website | Template |
 |---|---|---|
 | Überschriften | Sora 400, Hierarchie über die Größe; Ausnahmen: Sora 700 auf blauen Textflächen, Source Sans Pro 600 für Kastentitel und Namen | Sora 400 |
-| Fließtext | Source Sans Pro 400, 18/27 px | Source Sans 3 400, 18/27 px auf Inhaltsfolien und in Karten; kleiner sind Tabellen (16/24), Bildunterschriften (13 bis 16 px), Code (15/23) und die Fußzeile (12 px) |
+| Fließtext | Source Sans Pro 400, 18/27 px | Source Sans 3 400, 18/27 px auf Inhaltsfolien und in Karten; kleiner sind die Meta-Zeile der Titelfolie (16/24), Tabellen (16/24), Bildunterschriften (13 bis 16 px), Code (15/23), die Kapitelnummer in der Agenda (15/21), das Urteil bei `goodbad` (Sora 15/24) und die Fußzeile (12 px) |
 | Überzeile | Source Sans Pro, Großbuchstaben, so groß wie der Fließtext | gleich |
 | Links | halbfett, schwarz, Pfeil nach dem Text | gleich, Pfeil als SVG: Sora enthält ihn nicht, und so sieht er überall gleich aus |
 | Flächen | eckig, ohne Schatten und Verlauf | gleich |
 | Motiv | Farbflächen überlappen multiplizierend; Rot auf Grün ergibt fast Schwarz | gleich, auf Titel- und Abschlussfolie |
-| Diagramme | keine Entsprechung | Mermaid flach ohne Schatten und Verlauf, Torten in Gelb, Grün, Rot und `#F0F5F8` mit schwarzer Schrift |
+| Diagramme | keine Entsprechung | Mermaid flach ohne Schatten und Verlauf, Torten mit höchstens vier Segmenten in Gelb, Grün, Rot und `#F0F5F8` mit schwarzer Schrift; die eigenen SVG-Grafiken der Demo in Arial, weil ein SVG als Bild die Schriften der Folie nicht lädt |
 
 Die Größen sind von 1440 px Seitenbreite auf die 980 px breite Folie umgerechnet (Faktor etwa 0,68). Fließtext bleibt mit 18 px bewusst groß, weil Folien projiziert werden.
 
@@ -137,8 +139,9 @@ Die Hochschule stellt diese Datei nicht als Logo bereit. Sie sollte durch eine f
 ### Umsetzung im Template
 
 - `components/HofLogo.vue` lädt `brand/logo.svg` (auch `.png` oder `.webp`) aus dem Ordner des Foliensatzes. Fehlt die Datei, erscheint ein gestrichelter Platzhalter.
-- `.gitignore` schließt den Ordner `deck/brand/` sowie PDF- und PNG-Exporte aus. Die CI meldet eingecheckte Dateien aus `deck/brand/` und Exporte, `npm run check` zusätzlich Kopien der Logodatei an anderer Stelle. Beides greift erst nach dem Push; vorbeugend wirkt nur `.gitignore`.
+- `.gitignore` schließt den Ordner `deck/brand/` sowie PDF- und PNG-Exporte aus; nur das verhindert, dass sie eingecheckt werden. `npm run check` findet Kopien der Logodatei außerhalb von `deck/brand/`, lokal schon vor dem Commit und in der CI. Eingecheckte Dateien aus `deck/brand/` und Exporte meldet die CI erst nach dem Push.
 - Das npm-Paket enthält kein Logo, weil `deck/brand` nicht in `files` steht.
+- `docs/vorschau.png` zeigt den Platzhalter. `npm run vorschau:bild` verschiebt `deck/brand/` für die Aufnahme nach `.slidev/` und legt den Ordner danach zurück.
 - Ein gebauter Foliensatz (`npm run build`) und ein PDF-Export enthalten das Logo, wenn es lokal vorliegt. Wer einen Build öffentlich bereitstellt, etwa auf GitHub Pages, veröffentlicht damit auch das Logo.
 
 ## 4. Nutzungsrechte

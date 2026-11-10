@@ -70,19 +70,21 @@ vorname.nachname@hof-university.de
 
 - `Agenda` gehört auf eine `content`-Folie. Sie liest die Kapitel aus allen `section`-Folien, bis sechs als Farbkacheln, ab sieben als Liste.
 - `Card` hat `color` mit `soft` (Standard, hellgrau), `yellow`, `green`, `red` oder `blue`. Ohne `flush` haben Karten Abstand. `CardGrid flush` setzt sie bündig nebeneinander wie die Kacheln der Website und ist für farbige Karten gedacht.
-- `Figure` zeigt ein Bild höchstens 300 px hoch (`height` ändert das). Große Bilder gehören in die Layouts `content-image` oder `diagram`.
-- Komponenten mit schließendem Tag schreiben. `Card` und `Step` dürfen in einer Zeile stehen, Inline-Markdown darin funktioniert trotzdem. In anderen Komponenten Markdown durch Leerzeilen vom Tag trennen.
+- `Figure` zeigt ein Bild höchstens 300 px hoch. `height="250px"` ändert das; eine Zahl ohne Einheit gilt als px. Große Bilder gehören in die Layouts `content-image` oder `diagram`.
+- Komponenten mit schließendem Tag schreiben. `Card` und `Step` dürfen in einer Zeile stehen, Inline-Markdown darin funktioniert trotzdem, wenn die Komponente allein in ihrer Zeile steht und höchstens drei Leerzeichen eingerückt ist. In anderen Komponenten Markdown durch Leerzeilen vom Tag trennen.
 
 ## Gestaltung
 
 - **Farben** kommen nur über Layouts und `color`-Optionen. Keine Farbwerte, keine Farbklassen und kein rohes HTML in Folien. So bleiben alle Kombinationen lesbar: Schwarz auf Gelb, Grün und Rot, Weiß auf Blau.
 - **`class` und `style`** nur für Abstände und Größen, etwa `<Card class="mt-4">`.
 - **Schrift nie verkleinern**, um Inhalt unterzubringen. Kürzen, auf zwei Folien teilen oder `<v-clicks>` nutzen. Fließtext ist mit 18 px auf Projektion ausgelegt.
-- **Höchstens fünf Punkte** pro Liste und keine Unterpunkte.
-- **Lange Komposita** in Titeln mit `&shy;` an der Wortfuge trennen, etwa `Geschäftsprozess&shy;modellierung`. Sonst trennt der Browser nach Silben.
+- **Höchstens fünf Punkte** pro Liste und keine Unterpunkte, in `compare`, `content-image` und `goodbad` höchstens vier.
+- **Code** mit höchstens zwölf Zeilen und 80 Zeichen pro Zeile, in einer Spalte von `compare`, `content-image` und `goodbad` etwa 40.
+- **Lange Komposita** in Titeln mit `&shy;` an der Wortfuge trennen, etwa `Geschäftsprozess&shy;modellierung`. Sonst trennt der Browser nach Silben. Im Quadrat der Kapitelfolie (`section`) passen nur etwa zwölf Zeichen in eine Zeile; längere Wortteile trennt der Browser dort trotzdem nach Silben, also kurze Wörter wählen.
 - **Bilder** brauchen einen Alternativtext (`alt`, `imageAlt`, `diagramAlt`), rein dekorative ein leeres. Fremde Bilder brauchen eine Quelle (`source`) und das Recht zur Nutzung.
-- **Diagramme** müssen im PNG noch lesbar sein: Beschriftungen von etwa 14 px oder mehr auf der Folie. Breite Diagramme bekommen eine eigene Folie im Layout `diagram`. Exporte aus Werkzeugen behalten deren Schrift, meist Arial.
-- **Icons** stammen aus Lucide und werden als vollständige Klasse geschrieben, etwa `i-lucide-pencil`.
+- **Diagramme** müssen im PNG noch lesbar sein: Beschriftungen von etwa 14 px oder mehr auf der Folie. Breite Diagramme bekommen eine eigene Folie im Layout `diagram`. Tortendiagramme haben höchstens vier Segmente, weil das Theme nur vier Farben dafür hat. Exporte aus Werkzeugen behalten deren Schrift, meist Arial.
+- **Eigene SVG-Grafiken** laden als Bild keine Schriften der Folie. Beschriftungen vor dem Export in Pfade umwandeln oder, wie die Grafiken im Template, Arial verwenden.
+- **Icons** stammen aus Lucide und werden als vollständige Klasse geschrieben, etwa `i-lucide-pencil`. `npm run check` meldet Namen, die es nicht gibt.
 - **Logo** nie verändern, umfärben oder neu zeichnen. Das Theme platziert es selbst und nur auf Weiß.
 
 ## Dateien und Pfade

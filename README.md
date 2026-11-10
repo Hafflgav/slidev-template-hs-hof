@@ -33,7 +33,7 @@ Das Theme sucht das Logo unter `brand/logo.svg` im Ordner des Foliensatzes, hier
 
 Auch dieser Weg ist nicht freigegeben: Folien, PDFs und Builds, die Studierende erhalten oder die veröffentlicht werden, enthalten das Logo (offener Punkt 1 in [docs/quellen.md](docs/quellen.md)).
 
-Die Logodatei nicht einchecken. `deck/brand/` steht in `.gitignore`. Die CI und `npm run check` melden eingecheckte Logos und Exporte, allerdings erst nach dem Push.
+Die Logodatei nicht einchecken. `deck/brand/` steht in `.gitignore`. `npm run check` findet Kopien der Logodatei außerhalb von `deck/brand/` schon vor dem Commit. Ob `deck/brand/` oder Exporte trotzdem eingecheckt wurden, meldet die CI erst nach dem Push.
 
 ## Befehle
 
@@ -45,6 +45,7 @@ Die Logodatei nicht einchecken. `deck/brand/` steht in `.gitignore`. Die CI und 
 | `npm run export` | `folien.pdf`, eine Seite pro Folie im Endzustand |
 | `npm run export:klicks` | `folien-klicks.pdf`, eine Seite pro Klickschritt |
 | `npm run vorschau` | jede Folie als PNG in `.slidev/vorschau/`; eine einzelne mit `npm run vorschau -- --range 5` |
+| `npm run vorschau:bild` | erneuert `docs/vorschau.png` aus den Folien 1, 3, 6 und 18; legt `deck/brand/` dafür kurz beiseite, damit das Bild den Platzhalter zeigt |
 
 Weitere Varianten:
 
@@ -60,17 +61,19 @@ Ein Build enthält standardmäßig die Sprechernotizen und, falls lokal vorhande
 
 | Regel | Prüft |
 |---|---|
+| `theme-missing` | ein Theme-Pfad wie `./node_modules/slidev-theme-hs-hof` führt zu einem installierten Theme; Slidev selbst baut sonst ohne Fehler, aber ohne Layouts |
 | `sanctioned-layout` | nur Layouts des Themes oder eigene Layouts im Ordner `layouts/` des Foliensatzes |
 | `invalid-option` | gültige Werte für `color`, `side`, `fit`, `leftIsGood` und die Farbe von `Card` |
 | `no-raw-html` | kein rohes HTML, nur Markdown und Komponenten (erlaubt sind `sub`, `sup` und `kbd`) |
 | `unknown-component` | nur Komponenten, die es gibt (Theme, Slidev, eigener Ordner `components/`) |
 | `no-hardcoded-color` | keine Farbwerte in Attributen, Frontmatter und Mermaid-Diagrammen |
-| `no-style-override` | `style` nur für Abstände und Größen, keine Farbklassen, auch nicht in der Frontmatter |
+| `no-style-override` | `style` nur für Abstände und Größen, keine Farbklassen, auch nicht in der Frontmatter oder in MDC-Attributen wie `{.text-red-500}` |
+| `unknown-icon` | Icons gibt es in Lucide, und `icon` ist als vollständige Klasse geschrieben, etwa `i-lucide-pencil` |
 | `heading-single-line` | kein erzwungener Zeilenumbruch im Titel |
 | `image-alt` | Alternativtext für Bilder und Diagramme |
 | `resources-path`, `resources-missing` | Pfade unter `/resources/…` gibt es, und sie stehen nicht in Markdown-Bildern, die den Build abbrechen würden |
 
-Als Hinweis, ohne abzubrechen, meldet sie zu lange Titel, Listen mit mehr als fünf Punkten oder Unterpunkten, Codeblöcke ab 13 Zeilen, Tabellen ab acht Zeilen, eine Agenda ohne Kapitel und Kontaktzeilen ohne Leerzeile dazwischen. Mit `--self`, wie in diesem Repository, kommen hinzu: alle verwendeten Farb-Tokens sind definiert, Farbwerte stehen nur in `styles/theme.css`, `setup/mermaid.ts` und `setup/shiki.ts`, jedes Layout hat eine Demo-Folie mit vollständigem Hinweisblock, die Herkunft einer lokalen Logodatei ist dokumentiert, und außerhalb von `deck/brand/` liegt keine Kopie der Logodatei.
+Als Hinweis, ohne abzubrechen, meldet sie zu lange Titel, Listen mit mehr als fünf Punkten (in `compare`, `content-image` und `goodbad` mehr als vier) oder Unterpunkten, Codeblöcke ab 13 Zeilen, Codezeilen mit mehr als 80 Zeichen (in einer Spalte von `compare`, `content-image` und `goodbad` mehr als 40), Tabellen ab acht Zeilen, Tortendiagramme mit mehr als vier Segmenten, eine Agenda ohne Kapitel und Kontaktzeilen ohne Leerzeile dazwischen. Mit `--self`, wie in diesem Repository, kommen hinzu: alle verwendeten Farb-Tokens sind definiert, Farbwerte stehen nur in `styles/theme.css`, `setup/mermaid.ts` und `setup/shiki.ts`, jedes Layout hat eine Demo-Folie mit vollständigem Hinweisblock, die Herkunft einer lokalen Logodatei ist dokumentiert, und außerhalb von `deck/brand/` liegt keine Kopie der Logodatei.
 
 ## Aufbau
 
@@ -89,7 +92,7 @@ deck/                 Beispielfoliensatz
   chapter/NN-name/    NN-name.md und bei Bedarf resources/
   brand/              lokales Logo, nicht im Repository
 docs/                 Quellen und Rechte, Logo-Herkunft, Vorschau
-scripts/              Logo lokal aus dem Flyer erzeugen
+scripts/              Logo lokal aus dem Flyer erzeugen, Vorschaubild erneuern
 ```
 
 ## Folien schreiben
@@ -112,16 +115,29 @@ Dieses Repository ist zugleich das npm-Paket `slidev-theme-hs-hof`. Ein Foliensa
   "dev": "slidev slides.md --open",
   "prebuild": "npm run check",
   "build": "slidev build slides.md",
+  "preexport": "npm run check",
   "export": "slidev export slides.md --output folien.pdf",
+  "prevorschau": "npm run check",
   "vorschau": "slidev export slides.md --format png --output .slidev/vorschau",
   "check": "hof-slides-check slides.md"
 },
 "allowScripts": {
-  "playwright-chromium": true
+  "playwright-chromium": true,
+  "fsevents": false
 }
 ```
 
-`prebuild` prüft vor jedem Build. Fehlt das Theme, fehlt auch `hof-slides-check`, und der Build bricht ab, statt mit fehlenden Layouts weiterzulaufen.
+`prebuild`, `preexport` und `prevorschau` prüfen vor jedem Build und Export. Fehlt das Theme, fehlt auch `hof-slides-check`, und der Befehl bricht ab, statt mit fehlenden Layouts weiterzulaufen. Einen falschen Theme-Pfad in der `slides.md` meldet die Prüfung ebenfalls.
+
+Mit pnpm statt npm gehört die Freigabe vor der Installation in eine Datei `pnpm-workspace.yaml` neben der `package.json`; `allowScripts` gilt dort nicht:
+
+```yaml
+allowBuilds:
+  playwright-chromium: true
+  fsevents: false
+```
+
+Fehlt sie, bricht pnpm die Installation mit `ERR_PNPM_IGNORED_BUILDS` ab. Dann `pnpm approve-builds playwright-chromium` ausführen; das trägt die Freigabe nach und lädt Chromium. In den Befehlen unten steht dann `pnpm add` an Stelle von `npm install`. Mit pnpm 12.16 geprüft ist Weg B.
 
 **2. Installieren**, auf einem der beiden Wege:
 
@@ -133,10 +149,10 @@ Dieses Repository ist zugleich das npm-Paket `slidev-theme-hs-hof`. Ein Foliensa
 
   Ab npm 12 sind Git-Abhängigkeiten gesperrt. Dort `--allow-git=all` anhängen oder `allow-git=all` in die `.npmrc` des Projekts schreiben.
 
-- **Weg B, Paketdatei.** Funktioniert ohne weitere Einstellungen mit npm 10 bis 12 und mit pnpm. Im Template-Repository `npm pack` ausführen; das erzeugt `slidev-theme-hs-hof-<version>.tgz`. Diese Datei in den Ordner `vendor/` des anderen Repositorys kopieren und dort installieren:
+- **Weg B, Paketdatei.** Braucht keine Freigabe für Git-Abhängigkeiten; geprüft mit npm 10 bis 12 und pnpm 12. Im Template-Repository `npm pack` ausführen; das erzeugt `slidev-theme-hs-hof-<version>.tgz`, etwa `slidev-theme-hs-hof-0.1.0.tgz`. Diese Datei in den Ordner `vendor/` des anderen Repositorys kopieren und dort installieren, `<version>` durch die Version im Dateinamen ersetzt:
 
   ```bash
-  npm install -D -E @slidev/cli@53.1.0 playwright-chromium@1.64.1 ./vendor/slidev-theme-hs-hof-0.1.0.tgz
+  npm install -D -E @slidev/cli@53.1.0 playwright-chromium@1.64.1 ./vendor/slidev-theme-hs-hof-<version>.tgz
   ```
 
   Die `.tgz`-Datei wird mit eingecheckt.
@@ -153,7 +169,7 @@ layout: cover
 ---
 ```
 
-Der Pfad statt des Kurznamens `hs-hof` ist Absicht: Fehlt das Paket, bietet Slidev dann nicht an, ein gleichnamiges Paket aus dem öffentlichen npm-Register zu installieren, das jemand anderes veröffentlicht haben könnte.
+Der Pfad statt des Kurznamens `hs-hof` ist Absicht: Fehlt das Paket, bietet Slidev dann nicht an, ein gleichnamiges Paket aus dem öffentlichen npm-Register zu installieren, das jemand anderes veröffentlicht haben könnte. Der Pfad gilt relativ zur `slides.md`. Liegt sie in einem Unterordner, etwa `folien/slides.md`, heißt er `../node_modules/slidev-theme-hs-hof`, und die Skripte nennen `folien/slides.md`.
 
 Dazu eine `.gitignore`. Die `.gitignore` des Templates nicht kopieren, weil sie `*.tgz` ausschließt:
 
@@ -167,14 +183,14 @@ brand/
 folien*.pdf
 ```
 
-**4. Logo.** Wie unter [Logo einrichten](#logo-einrichten) beschrieben erzeugen oder anfordern und als `brand/logo.svg` neben die `slides.md` legen. In einer CI erkennt `test -z "$(git ls-files brand)"`, wenn es doch eingecheckt wurde.
+**4. Logo.** Wie unter [Logo einrichten](#logo-einrichten) beschrieben anfordern oder erzeugen und als `brand/logo.svg` neben die `slides.md` legen. Das Skript `scripts/logo-aus-flyer.sh` gehört nicht zum Paket: Es in einem Klon dieses Repositorys ausführen und die erzeugte `deck/brand/logo.svg` hinüberkopieren. In einer CI erkennt `test -z "$(git ls-files '*brand/*')"`, wenn das Logo doch eingecheckt wurde, auch in einem Unterordner.
 
 **5. Weiteres.**
 
 - Vorlagen: Die Demo-Folien liegen unter `node_modules/slidev-theme-hs-hof/deck/`.
 - Claude Code: `@node_modules/slidev-theme-hs-hof/AUTHORING.md` in die `CLAUDE.md` schreiben, dann gelten die Regeln der installierten Theme-Version.
 
-**Aktualisieren.** Bei Weg A den Tag im Befehl ändern und ihn erneut ausführen. Bei Weg B vor jedem `npm pack` die Version des Templates erhöhen (`npm version patch`), nie eine `.tgz` durch eine andere mit gleichem Namen ersetzen, dann im anderen Repository `npm install -D -E ./vendor/slidev-theme-hs-hof-<neue Version>.tgz` ausführen und die alte Datei löschen. In beiden Fällen danach `npm run check` und `npm run build` und `package.json`, `package-lock.json` und gegebenenfalls `vendor/` zusammen einchecken.
+**Aktualisieren.** Bei Weg A den Tag im Befehl ändern und ihn erneut ausführen. Bei Weg B vor jedem `npm pack` die Version des Templates erhöhen und nie eine `.tgz` durch eine andere mit gleichem Namen ersetzen. `npm version patch` erhöht die Version, braucht dafür einen sauberen Arbeitsstand und legt einen Commit und einen Tag an. Dann im anderen Repository `npm install -D -E ./vendor/slidev-theme-hs-hof-<neue Version>.tgz` ausführen und die alte Datei löschen. In beiden Fällen danach `npm run check` und `npm run build` ausführen und `package.json`, die Lockdatei (`package-lock.json` oder `pnpm-lock.yaml`) und gegebenenfalls `vendor/` zusammen einchecken.
 
 ## Gestaltung
 
@@ -188,7 +204,8 @@ Die Gestaltung folgt der Website der Hochschule, weil keine öffentliche Gestalt
 - **Slidev fragt, ob es `slidev-theme-hs-hof` installieren soll:** ablehnen. Das Paket steht nicht im npm-Register; stattdessen die Installation oben wiederholen.
 - **`npm audit` meldet Schwachstellen:** Sie stammen aus Abhängigkeiten von Slidev selbst. `npm audit fix --force` nicht ausführen; es stuft Slidev unter die unterstützte Version herab, und das Theme startet dann nicht mehr.
 - **„(global)“ in der Startmeldung von Slidev:** normal, weil der Beispielfoliensatz im Unterordner `deck/` liegt.
-- **Icon fehlt:** Lucide-Klassen wie `i-lucide-pencil` vollständig ausschreiben. Aus Variablen zusammengesetzte Namen erzeugt UnoCSS nicht.
+- **`ERR_PNPM_IGNORED_BUILDS` bei der Installation mit pnpm:** Die Freigabe in `pnpm-workspace.yaml` fehlt, siehe [In einem anderen Repository verwenden](#in-einem-anderen-repository-verwenden).
+- **Icon fehlt:** Lucide-Klassen wie `i-lucide-pencil` vollständig ausschreiben. Aus Variablen zusammengesetzte Namen erzeugt UnoCSS nicht. Namen, die es in Lucide nicht gibt, meldet `npm run check`.
 
 ## Lizenz
 
