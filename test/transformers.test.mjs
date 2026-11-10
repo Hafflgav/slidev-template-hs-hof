@@ -53,3 +53,15 @@ test('lässt Codeblöcke und andere Komponenten unverändert', () => {
   assert.equal(run(fenced), fenced)
   assert.equal(run(grid), grid)
 })
+
+test('beendet einen Codeblock nur am passenden Zaun', () => {
+  const longer = '````md\n```\n<Card title="A">Text.</Card>\n```\n````'
+  const mixed = '```md\n~~~\n<Step label="A">Text.</Step>\n~~~\n```'
+  assert.equal(run(longer), longer)
+  assert.equal(run(mixed), mixed)
+  // Ein längerer schließender Zaun beendet den Block ebenfalls.
+  assert.equal(
+    run('```js\nx\n````\n<Card title="A">Text.</Card>'),
+    '```js\nx\n````\n<Card title="A">\n\nText.\n\n</Card>',
+  )
+})
