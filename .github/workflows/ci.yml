@@ -38,7 +38,8 @@ jobs:
       - run: npm run build
 
       # Wie in der README: Pfad statt Kurzname, Prüfung über prebuild. Slidev baut
-      # auch ohne Theme fehlerfrei, deshalb zum Schluss die Theme-Styles im Build suchen.
+      # auch ohne Theme fehlerfrei, deshalb zum Schluss die Theme-Styles im Build
+      # suchen. Die MIT-Lizenz des Themes muss mit dem Paket in den Build kommen.
       - name: Theme in einem frischen Foliensatz installieren und bauen
         run: |
           npm pack --pack-destination "$RUNNER_TEMP"
@@ -50,3 +51,4 @@ jobs:
           printf -- '---\ntheme: ./node_modules/slidev-theme-hs-hof\nlayout: cover\n---\n\n# Probe\n' > slides.md
           npm run build
           grep -q -- '--hof-blue' dist/assets/*.css
+          grep -q '^MIT License' dist/lizenzen/LICENSE
