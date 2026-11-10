@@ -5,9 +5,10 @@ import { fileURLToPath } from 'node:url'
 // Jedes Kapitel hält seine Dateien in chapter/<kapitel>/resources/. Slidev kennt
 // nur einen public-Ordner, deshalb stellt dieses Plugin die Dateien unter
 // /resources/<kapitel>/<datei> bereit: im Dev-Server (auch für den Export) und
-// als Kopie im Build. Außerdem legt es dem Build die Lizenzhinweise bei.
+// als Kopie im Build. Außerdem legt es dem Build die MIT-Lizenz des Themes und
+// die Lizenzhinweise bei; ein gebauter Foliensatz enthält Code des Themes.
 const THEME = resolve(dirname(fileURLToPath(import.meta.url)), '..')
-const NOTICES = ['THIRD_PARTY_NOTICES.md', 'assets/fonts/OFL-Sora.txt', 'assets/fonts/OFL-SourceSans3.md']
+const NOTICES = ['LICENSE', 'THIRD_PARTY_NOTICES.md', 'assets/fonts/OFL-Sora.txt', 'assets/fonts/OFL-SourceSans3.md']
 
 const MIME: Record<string, string> = {
   '.svg': 'image/svg+xml',
