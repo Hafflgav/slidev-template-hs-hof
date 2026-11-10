@@ -5,7 +5,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { basename, dirname, join, relative, resolve } from 'node:path'
+import { basename, dirname, join, relative, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { load } from '@slidev/parser/fs'
 
@@ -17,16 +17,19 @@ const deckDir = dirname(entry)
 
 const errors = []
 const hints = []
-const where = (file, line) => `${relative(process.cwd(), file)}:${line}`
-const error = (file, line, rule, msg) => errors.push(`${where(file, line)}  [${rule}] ${msg}`)
-const hint = (file, line, rule, msg) => hints.push(`${where(file, line)}  [${rule}] ${msg}`)
+const report = list => (file, line, rule, msg) => list.push({ file, line, text: `${relative(process.cwd(), file)}:${line}  [${rule}] ${msg}` })
+const error = report(errors)
+const hint = report(hints)
 
 // Codeblöcke (auch eingerückt oder mit ~~~), Kommentare und Inline-Code zählen
 // nicht als Folieninhalt. Sie werden durch Leerzeichen ersetzt, damit
 // Zeilennummern stimmen.
 const blank = (text, re) => text.replace(re, m => m.replace(/[^\n]/g, ' '))
-const FENCE_BLOCK = /^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm
-const sanitize = src => blank(blank(blank(src, FENCE_BLOCK), /<!--[\s\S]*?-->/g), /`[^`\n]*`/g)
+// Codeblock mit Zaun (1, 2), Infotext (3) und Inhalt (4). Der schließende Zaun
+// nutzt dasselbe Zeichen und ist mindestens so lang. matchAll findet nur Blöcke
+// auf oberster Ebene; ein Block in einem ````md-Beispiel bleibt Inhalt.
+const FENCE = /^[ \t]*(([`~])\2{2,})[ \t]*([^\n]*)\n([\s\S]*?)^[ \t]*\1\2*[ \t]*$/gm
+const sanitize = src => blank(blank(blank(src, FENCE), /<!--[\s\S]*?-->/g), /`[^`\n]*`/g)
 const lineOf = (text, index) => text.slice(0, index).split('\n').length
 const names = (dir, re) => (existsSync(dir) ? readdirSync(dir).filter(f => re.test(f)).map(f => basename(f).replace(re, '')) : [])
 const walk = dir => readdirSync(dir, { withFileTypes: true }).flatMap(e => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]))
@@ -52,17 +55,32 @@ const COMPONENTS = new Set([
   ...slidevBuiltins(),
   'Transition', 'TransitionGroup', 'KeepAlive', 'Teleport', 'Suspense', 'Component', 'Slot', 'Template',
 ])
-// Ein vollständiger öffnender Tag, auch über mehrere Zeilen.
-const TAG = /<([A-Za-z][\w-]*)(?=[\s/>])[^<>]*>/g
+// Ein vollständiger öffnender Tag, auch über mehrere Zeilen. Attributwerte in
+// Anführungszeichen dürfen ">" enthalten, etwa title="A -> B".
+const TAG = /<([A-Za-z][\w-]*)(?=[\s/>])(?:"[^"]*"|'[^']*'|[^<>"'])*>/g
 const ATTR = /(?<![-\w:@#])(:?[\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/g
 const SPACING = /^(?:margin|padding|width|height|min|max|gap|align|justify|grid|flex|order)/i
 const COLOR_NAMES = 'slate|gray|grey|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose|black|white|transparent|current'
-const COLOR_UTILITY = new RegExp(String.raw`^(?:[\w-]+:)*!?(?:text|bg|border(?:-[trblxy])?|from|via|to|fill|stroke|ring|outline|accent|decoration|divide|shadow|caret|placeholder|c|color)-(?:\[.+\]|(?:${COLOR_NAMES})(?:-\d{2,3})?(?:\/\d+)?)$`)
-// In Theme-Dateien zählt jedes Farbliteral; dreistellige Werte nur mit Buchstabe,
-// damit Nummern wie #101 nicht auffallen.
-const COLOR_LITERAL = /(?<![\w&/])#(?:[0-9a-f]{8}|[0-9a-f]{6}|(?=[0-9]*[a-f])[0-9a-f]{3,4})\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch)\(/i
+// UnoCSS kennt auch text-red, text-red-5, text-violet6, color-#f00 und Varianten wie hover:.
+const COLOR_UTILITY = new RegExp(String.raw`^(?:[\w-]+:)*!?(?:text|bg|border(?:-[trblxy])?|from|via|to|fill|stroke|ring|outline|accent|decoration|divide|shadow|caret|placeholder|c|color)-(?:\[.+\]|#[0-9a-f]{3,8}|(?:${COLOR_NAMES})(?:-?\d{1,3})?(?:\/\d+)?)$`, 'i')
+// Dreistellige Werte zählen nur mit Buchstabe, damit Nummern wie #101 nicht auffallen.
+const HEX = String.raw`#(?:[0-9a-f]{8}|[0-9a-f]{6}|(?=[0-9]*[a-f])[0-9a-f]{3,4})`
+// In Theme-Dateien zählt jedes Farbliteral.
+const COLOR_LITERAL = new RegExp(String.raw`(?<![\w&/])${HEX}\b|\b(?:rgba?|hsla?|oklch|oklab|lab|lch)\(`, 'i')
 // In Folien zählt ein Wert nur, wenn er als Ganzes eine Farbe ist ("Raum #101" nicht).
-const COLOR_VALUE = /^\s*(?:#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})|(?:rgba?|hsla?|oklch|oklab|lab|lch)\(.*\))\s*$/i
+const COLOR_VALUE = new RegExp(String.raw`^\s*(?:${HEX}|(?:rgba?|hsla?|oklch|oklab|lab|lch)\(.*\))\s*$`, 'i')
+
+function lucideIcons() {
+  try {
+    const file = createRequire(join(THEME, 'noop.js')).resolve('@iconify-json/lucide/icons.json')
+    const set = JSON.parse(readFileSync(file, 'utf8'))
+    return new Set([...Object.keys(set.icons), ...Object.keys(set.aliases ?? {})])
+  }
+  catch {
+    return null
+  }
+}
+const ICONS = lucideIcons()
 
 const OPTIONS = {
   color: { layouts: ['section', 'hero', 'interactive'], values: ['yellow', 'green', 'red', 'blue'] },
@@ -72,13 +90,20 @@ const OPTIONS = {
 }
 const CARD_COLORS = ['soft', 'yellow', 'green', 'red', 'blue']
 
-// Grobe Zeichenbudgets für zwei Zeilen Titel. Nur ein Hinweis: die Schrift
-// wird nie verkleinert, also lieber kürzen oder teilen.
+// Grobe Zeichenbudgets für zwei Zeilen Titel. Nur ein Hinweis: auch längere
+// Titel bleiben auf der Folie, aber die Schrift wird nie verkleinert, also
+// lieber kürzen oder teilen.
 const TITLE_BUDGET = { cover: 44, closing: 30, section: 50, subsection: 60, hero: 90, interactive: 100, 'content-image': 60 }
 const DEFAULT_TITLE_BUDGET = 90
-const LIST_LIMIT = 5
+const LIST_LIMIT = { compare: 4, 'content-image': 4, goodbad: 4 }
+const DEFAULT_LIST_LIMIT = 5
+const LIST_ITEM = /^(?:[-*+]|\d+[.)])\s/
 const CODE_LIMIT = 12
+// Zeichen je Codezeile bei voller Breite und in einer Spalte.
+const CODE_LINE_LIMIT = { compare: 40, goodbad: 40, 'content-image': 40 }
+const DEFAULT_CODE_LINE_LIMIT = 80
 const TABLE_LIMIT = 7
+const PIE_LIMIT = 4
 
 function resourceExists(url) {
   const [chapter, ...rest] = url.replace(/^\/resources\//, '').split('/')
@@ -100,6 +125,42 @@ function checkClasses(file, line, value) {
     if (COLOR_UTILITY.test(cls))
       error(file, line, 'no-style-override', `Farbklasse "${cls}" ist nicht erlaubt; Farben kommen aus Layouts und color-Optionen`)
   }
+  checkIcons(file, line, value)
+}
+// UnoCSS schreibt Icons als i-lucide-name oder i-lucide:name, wahlweise mit ?mask, ?bg oder ?auto.
+const ICON_CLASS = /(?:^|\s)(i-lucide[-:]([\w-]+?)(?:\?(?:mask|bg|auto))?)(?=\s|$)/g
+function checkIcons(file, line, value) {
+  for (const [, icon, name] of String(value ?? '').matchAll(ICON_CLASS)) {
+    if (ICONS && !ICONS.has(name))
+      error(file, line, 'unknown-icon', `Icon ${icon} gibt es nicht; Namen unter https://lucide.dev/icons`)
+  }
+}
+// Card und interactive setzen icon als Klasse; ohne Präfix bleibt die Fläche leer.
+function checkIconOption(file, line, value) {
+  const icon = String(value ?? '').trim()
+  if (!/^i-lucide[-:][\w-]+(?:\?(?:mask|bg|auto))?$/.test(icon))
+    error(file, line, 'unknown-icon', `icon "${value}" als vollständige Klasse schreiben, etwa i-lucide-pencil`)
+  else
+    checkIcons(file, line, icon)
+}
+// Wie Slidev: absolute Pfade, @/ relativ zum Foliensatz, sonst Werte mit . am
+// Anfang oder mit / ohne @ davor. Alles andere ist ein Paketname.
+function themePath(name) {
+  if (typeof name !== 'string')
+    return null
+  if (name.startsWith('/'))
+    return name
+  if (name.startsWith('@/'))
+    return resolve(deckDir, name.slice(2))
+  if (name.startsWith('.') || (!name.startsWith('@') && name.includes('/')))
+    return resolve(deckDir, name)
+  return null
+}
+function checkStyle(file, line, value) {
+  for (const [, prop] of String(value).matchAll(/([a-z-]+)\s*:/gi)) {
+    if (!SPACING.test(prop.replace(/-/g, '')))
+      error(file, line, 'no-style-override', `style nur für Abstände und Größen, nicht für "${prop}"`)
+  }
 }
 
 const data = await load({ userRoot: deckDir }, entry)
@@ -109,6 +170,14 @@ const demoCoverage = new Map()
 
 for (const md of Object.values(data.markdownFiles)) {
   for (const e of md.errors ?? []) error(md.filepath, e.row + 1, 'parse', e.message)
+}
+
+// Mit einem falschen Theme-Pfad baut Slidev fehlerfrei, nur ohne Layouts und Farben.
+const theme = data.headmatter?.theme
+const themeDir = themePath(theme)
+if (themeDir && !existsSync(themeDir)) {
+  const line = readFileSync(entry, 'utf8').split('\n').findIndex(l => /^theme\s*:/.test(l)) + 1
+  error(entry, line || 1, 'theme-missing', `Theme ${theme} gibt es nicht. Der Pfad gilt relativ zu ${basename(entry)}; sonst die Installation wiederholen`)
 }
 
 for (const file of Object.keys(data.markdownFiles)) {
@@ -130,20 +199,23 @@ for (const file of Object.keys(data.markdownFiles)) {
       const name = a[1].replace(/^:/, '')
       const value = a[2] ?? a[3]
       if (name === 'style') {
-        for (const [, prop] of value.matchAll(/([a-z-]+)\s*:/gi)) {
-          if (!SPACING.test(prop.replace(/-/g, '')))
-            error(file, at, 'no-style-override', `style nur für Abstände und Größen, nicht für "${prop}"`)
-        }
+        checkStyle(file, at, value)
       }
       else if (name === 'class') {
         checkClasses(file, at, value)
+      }
+      else if (name === 'icon') {
+        if (pascal(tag) === 'Card' && !a[1].startsWith(':'))
+          checkIconOption(file, at, value)
+        else
+          checkIcons(file, at, value)
       }
       else if (COLOR_VALUE.test(value.replace(/^'(.*)'$/, '$1'))) {
         error(file, at, 'no-hardcoded-color', `Farbwert in ${name}="${value}"; Farben kommen aus dem Theme`)
       }
       if (name === 'src')
         checkResource(file, at, value)
-      if (tag === 'Card' && name === 'color' && !a[1].startsWith(':') && !CARD_COLORS.includes(value))
+      if (pascal(tag) === 'Card' && name === 'color' && !a[1].startsWith(':') && !CARD_COLORS.includes(value))
         error(file, at, 'invalid-option', `Card color="${value}" gibt es nicht. Erlaubt: ${CARD_COLORS.join(', ')}`)
     }
     if (tag === 'Figure' && !/\balt\s*=/.test(whole))
@@ -158,9 +230,22 @@ for (const file of Object.keys(data.markdownFiles)) {
       error(file, at, 'resources-path', 'Markdown-Bilder mit /resources/… brechen den Build ab; <Figure src="/resources/…" alt="…"></Figure> verwenden')
   }
 
+  // MDC-Attribute wie [Wort]{.text-red-500} oder {style="color: blue"}.
+  for (const m of clean.matchAll(/(?<!\{)\{([^{}\n]+)\}(?!\})/g)) {
+    const attrs = m[1].trim()
+    if (!/^[.#]|\b(?:class|style)\s*=/.test(attrs))
+      continue
+    const at = lineOf(clean, m.index)
+    checkClasses(file, at, [...attrs.matchAll(/(?:^|\s)\.([\w:!/#[\]-]+)/g)].map(c => c[1]).join(' '))
+    for (const s of attrs.matchAll(/\bstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) checkStyle(file, at, s[1] ?? s[2])
+    for (const c of attrs.matchAll(/\bclass\s*=\s*(?:"([^"]*)"|'([^']*)')/g)) checkClasses(file, at, c[1] ?? c[2])
+  }
+
   // Mermaid übernimmt Farben aus style, classDef, linkStyle und init-Direktiven.
-  for (const m of raw.matchAll(/^[ \t]*(`{3,}|~{3,})mermaid[^\n]*\n([\s\S]*?)^[ \t]*\1[ \t]*$/gm)) {
-    m[2].split('\n').forEach((line, i) => {
+  for (const m of raw.matchAll(FENCE)) {
+    if (!/^mermaid\b/.test(m[3]))
+      continue
+    m[4].split('\n').forEach((line, i) => {
       if ((/^\s*(?:style|classDef|linkStyle)\b/.test(line) || line.includes('%%{')) && (COLOR_LITERAL.test(line) || /\b(?:fill|stroke|color|background)\s*:/i.test(line)))
         error(file, lineOf(raw, m.index) + 1 + i, 'no-hardcoded-color', 'Farben in Mermaid-Diagrammen kommen aus dem Theme (setup/mermaid.ts)')
     })
@@ -196,6 +281,8 @@ for (const slide of data.slides) {
   for (const [key, value] of Object.entries(fm)) {
     if (key === 'class')
       checkClasses(...at(slide, key), value)
+    else if (key === 'icon')
+      (layout === 'interactive' ? checkIconOption : checkIcons)(...at(slide, key), value)
     else if (typeof value === 'string' && COLOR_VALUE.test(value))
       error(...at(slide, key), 'no-hardcoded-color', `Farbwert in ${key}: ${value}; Farben kommen aus dem Theme`)
   }
@@ -210,34 +297,64 @@ for (const slide of data.slides) {
   if (title) {
     if (/<br\s*\/?>/i.test(title))
       error(...at(slide), 'heading-single-line', 'Titel ohne erzwungenen Zeilenumbruch schreiben')
+    const length = [...title].length
     const budget = TITLE_BUDGET[layout] ?? DEFAULT_TITLE_BUDGET
-    if ([...title].length > budget)
-      hint(...at(slide), 'title-length', `Titel hat ${[...title].length} Zeichen, für ${layout} passen etwa ${budget} in zwei Zeilen`)
+    if (length > budget)
+      hint(...at(slide), 'title-length', `Titel hat ${length} Zeichen, für ${layout} passen etwa ${budget} in zwei Zeilen`)
   }
 
+  // Punkte je Liste, nach CommonMark: Ein Punkt links vom Inhalt des offenen
+  // Punkts ist ein weiterer Punkt derselben Liste, einer darunter ein Unterpunkt.
+  // Eingerückte Zeilen und direkt anschließender Text gehören zum offenen Punkt,
+  // Leerzeilen zwischen Punkten trennen die Liste nicht, ein Codeblock links
+  // vom Inhalt beendet sie.
+  const listLimit = LIST_LIMIT[layout] ?? DEFAULT_LIST_LIMIT
+  const fences = new Map([...raw.matchAll(FENCE)].map(m => [lineOf(raw, m.index) - 1, m[0].length - m[0].trimStart().length]))
   let run = 0
+  let offset = 0
+  let gap = false
   let nested = false
-  for (const line of [...content.split('\n'), '']) {
-    if (/^(?:[-*+]|\d+\.)\s/.test(line)) {
+  content.split('\n').concat('#').forEach((line, i) => {
+    const indent = line.length - line.trimStart().length
+    const fenceEnds = fences.has(i) && fences.get(i) < offset
+    const empty = !line.trim() && !fenceEnds
+    const item = line.match(/^ {0,3}(?:[-*+]|\d+[.)])[ \t]+/)
+    if (item && (!run || indent < offset)) {
       run++
-      continue
+      offset = item[0].length
     }
-    if (/^\s{2,}(?:[-*+]|\d+\.)\s/.test(line) && run) {
-      nested = true
-      continue
+    else if (run && !empty && !fenceEnds && (indent >= offset || (!gap && !/^(?:#|::\w+::|<|\||>)/.test(line)))) {
+      nested ||= indent >= offset && LIST_ITEM.test(line.trimStart())
     }
-    if (run > LIST_LIMIT)
-      hint(...at(slide), 'list-length', `Liste mit ${run} Punkten; höchstens ${LIST_LIMIT}, sonst auf zwei Folien verteilen`)
-    if (line.trim())
+    else if (!empty) {
+      if (run > listLimit)
+        hint(...at(slide), 'list-length', `Liste mit ${run} Punkten; für ${layout} höchstens ${listLimit}, sonst auf zwei Folien verteilen`)
       run = 0
-  }
+      offset = 0
+    }
+    gap = empty
+  })
   if (nested)
     hint(...at(slide), 'list-length', 'Unterpunkte vermeiden, lieber eine eigene Folie oder Liste')
 
-  for (const m of raw.matchAll(/^[ \t]*(`{3,}|~{3,})(\w*)[^\n]*\n([\s\S]*?)^[ \t]*\1[ \t]*$/gm)) {
-    const lines = m[3].split('\n').length - 1
-    if (m[2] !== 'mermaid' && lines > CODE_LIMIT)
-      hint(...at(slide), 'code-length', `Codeblock mit ${lines} Zeilen; ab ${CODE_LIMIT + 1} läuft er unter die Fußzeile`)
+  const lineLimit = CODE_LINE_LIMIT[layout] ?? DEFAULT_CODE_LINE_LIMIT
+  for (const m of raw.matchAll(FENCE)) {
+    const info = m[3]
+    const lines = m[4].split('\n').slice(0, -1)
+    if (/^mermaid\b/.test(info)) {
+      const slices = /^\s*pie\b/m.test(m[4]) ? lines.filter(l => /^\s*"[^"]*"\s*:\s*[\d.]+/.test(l)).length : 0
+      if (slices > PIE_LIMIT)
+        hint(...at(slide), 'pie-slices', `Tortendiagramm mit ${slices} Segmenten; das Theme hat Farben für ${PIE_LIMIT}, weitere sind kaum zu unterscheiden`)
+      continue
+    }
+    // Magic Move zeigt jeden inneren Codeblock als eigenen Schritt.
+    const steps = /^(?:md|markdown) magic-move\b/.test(info) ? [...m[4].matchAll(FENCE)].map(s => s[4].split('\n').slice(0, -1)) : [lines]
+    const tallest = Math.max(0, ...steps.map(s => s.length))
+    if (tallest > CODE_LIMIT)
+      hint(...at(slide), 'code-length', `Codeblock mit ${tallest} Zeilen; ab ${CODE_LIMIT + 1} läuft er unter die Fußzeile`)
+    const longest = Math.max(0, ...steps.flat().map(l => [...l].length))
+    if (longest > lineLimit)
+      hint(...at(slide), 'code-length', `Codezeile mit ${longest} Zeichen; für ${layout} höchstens etwa ${lineLimit}, sonst passt sie nicht in den Codeblock`)
   }
   const rows = content.split('\n').filter(l => /^\s*\|/.test(l) && !/^\s*\|[\s:|-]+\|?\s*$/.test(l)).length - 1
   if (rows > TABLE_LIMIT)
@@ -296,15 +413,22 @@ if (self) {
     if (!documented.includes(hash))
       error(join(brandDir, name), 1, 'logo-herkunft', `Herkunft nicht in docs/logo-herkunft.json dokumentiert (sha256 ${hash})`)
   }
-  const SKIP = /^(?:node_modules|\.git|\.slidev|\.gstack|dist|brand)$|-export$/
-  const repoFiles = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap(e => (e.isDirectory() ? (SKIP.test(e.name) ? [] : repoFiles(join(dir, e.name))) : [join(dir, e.name)]))
+  // Ausgelassen werden nur Ordner, die nie ins Repository oder ins Paket kommen.
+  const SKIP_ROOT = /^(?:\.git|\.gstack|\.slidev|dist|deck\/brand|deck\/dist|deck\/\.slidev|[^/]*-export)$/
+  const repoFiles = dir => readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const full = join(dir, e.name)
+    if (e.isDirectory())
+      return e.name === 'node_modules' || SKIP_ROOT.test(relative(THEME, full).split(sep).join('/')) ? [] : repoFiles(full)
+    return e.isFile() ? [full] : []
+  })
   for (const file of repoFiles(THEME)) {
     if (statSync(file).size < 5e6 && documented.includes(sha(file)))
       error(file, 1, 'logo-copy', 'Kopie des Hochschullogos außerhalb von deck/brand; ohne Freigabe nicht ins Repository')
   }
 }
 
-for (const line of errors) console.error(line)
-for (const line of hints) console.log(`Hinweis: ${line}`)
+const byPlace = (a, b) => a.file.localeCompare(b.file) || a.line - b.line
+for (const e of errors.sort(byPlace)) console.error(e.text)
+for (const h of hints.sort(byPlace)) console.log(`Hinweis: ${h.text}`)
 console.log(`${Object.keys(data.markdownFiles).length} Datei(en), ${data.slides.length} Folie(n), ${errors.length} Fehler, ${hints.length} Hinweis(e)`)
 process.exit(errors.length ? 1 : 0)

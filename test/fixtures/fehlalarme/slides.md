@@ -52,3 +52,87 @@ layout: compare
 - f
 - g
 - h
+
+---
+layout: content
+---
+
+# Listen und Werte
+
+- Erster Punkt, der in der
+  nächsten Zeile weitergeht
+- Zweiter Punkt
+mit fauler Fortsetzung
+
+- Dritter Punkt nach Leerzeile
+
+  Zweiter Absatz im dritten Punkt
+- Vierter Punkt
+- Fünfter Punkt
+
+<Card title="#101" icon="i-lucide-pencil-ruler">Raum.</Card>
+
+<Figure src="/bild.svg" caption="Eingabe -> Ausgabe" alt="Ablauf"></Figure>
+
+Ein Anker {#anker} und eine Menge {a, b}.
+
+````md
+```
+<Card title="Zaun im Zaun" class="text-red-500">Text.</Card>
+```
+````
+
+---
+layout: content
+---
+
+# Weitere erlaubte Formen
+
+<Card title="Doppelpunkt" icon="i-lucide:pencil">Text.</Card>
+
+<Card title="Maske" icon="i-lucide-pencil?mask">Text.</Card>
+
+- Eins
+ - Zwei, ein Leerzeichen eingerückt und trotzdem kein Unterpunkt
+- Drei
+
+```js
+const zwischen = 'zwei Listen'
+```
+
+- Vier
+- Fünf
+- Sechs
+
+````md
+```mermaid
+flowchart LR
+  style A fill:#ff0000
+```
+````
+
+````md magic-move
+```js
+const a = 1
+const b = 2
+const c = 3
+```
+```js
+const a = 1
+const b = 2
+const d = 4
+```
+```js
+const a = 1
+const b = 2
+const c = 3
+const d = 4
+```
+````
+
+---
+layout: interactive
+icon: i-lucide-pencil
+---
+
+# Gültiges Icon

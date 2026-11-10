@@ -41,6 +41,39 @@ flowchart LR
   - Unterpunkt
 
 ---
+layout: content
+---
+
+# Weitere Farbformen und Icons
+
+<Card class="text-red-5 text-violet6 color-#ff0000 mt-4">Text.</Card>
+
+<Card title="A -> B" class="text-blue">Text.</Card>
+
+[Rot]{.text-red-500} und [Blau]{style="color: blue"}
+
+<Card title="Tippfehler im Icon" icon="i-lucide-pencl">Text.</Card>
+
+<Card title="Icon ohne Präfix" icon="pencil">Text.</Card>
+
+<card title="kebab ohne Präfix" icon="pencil">Text.</card>
+
+<card title="kebab gelb" color="gelb">Text.</card>
+
+``` mermaid
+flowchart LR
+  A --> B
+  style B fill:#00ff00
+```
+
+---
+layout: interactive
+icon: i-lucide-gibt-es-nicht
+---
+
+# Unbekanntes Icon
+
+---
 layout: hero
 color: gelb
 ---

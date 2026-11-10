@@ -19,10 +19,13 @@ layout: content
 
 # Lange Liste
 
-- Eins
+- Eins, mit einer Zeile,
+  die eingerückt weitergeht
 - Zwei
+mit fauler Fortsetzung
 - Drei
-- Vier
+
+- Vier nach einer Leerzeile
 - Fünf
 - Sechs
 
@@ -49,6 +52,41 @@ const m = 13
 ```
 
 ---
+layout: compare
+---
+
+# Zwei Spalten
+
+::left::
+
+- a
+- b
+- c
+- d
+- e
+
+::right::
+
+```js
+const zuLang = 'Diese Zeile ist für eine Spalte zu lang'
+```
+
+---
+layout: mermaid
+---
+
+# Torte
+
+```mermaid
+pie
+  "A" : 1
+  "B" : 1
+  "C" : 1
+  "D" : 1
+  "E" : 1
+```
+
+---
 layout: content
 ---
 
@@ -69,7 +107,7 @@ layout: content
 layout: closing
 ---
 
-# Danke
+# Vielen herzlichen Dank für Ihre Aufmerksamkeit
 
 ::contact::
 
