@@ -70,7 +70,7 @@
   },
   "devDependencies": {
     "@slidev/cli": "53.1.0",
-    "playwright-chromium": "1.64.1"
+    "playwright-chromium": "1.65.0"
   },
   "allowScripts": {
     "playwright-chromium": true,
