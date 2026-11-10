@@ -1,6 +1,6 @@
 # Hinweise zu Drittanbietern
 
-Gebaute Foliensätze enthalten diese Hinweise und die Lizenztexte der Schriften im Ordner `lizenzen/`.
+Das Theme selbst steht unter der MIT-Lizenz (`LICENSE`). Gebaute Foliensätze enthalten sie, diese Hinweise und die Lizenztexte der Schriften im Ordner `lizenzen/`.
 
 ## Miragon Slidev Deck Template
 
@@ -100,4 +100,4 @@ SOFTWARE.
 
 ## Hochschule Hof
 
-Logo, Name und Claim der Hochschule Hof gehören der Hochschule und fallen unter keine Lizenz dieses Repositorys. Das Logo ist nicht im Repository enthalten, siehe `docs/quellen.md`.
+Logo, Name und Claim der Hochschule Hof gehören der Hochschule und fallen nicht unter die MIT-Lizenz dieses Repositorys. Das Logo ist nicht im Repository enthalten, siehe `docs/quellen.md`.

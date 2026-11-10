@@ -53,7 +53,7 @@ Weitere Varianten:
 - Unter einem Unterpfad wie bei GitHub Pages: `npx slidev build deck/slides.md --base /slidev-template-hs-hof/`
 - PDF mit einem installierten Chrome statt des heruntergeladenen Chromium: `npx slidev export deck/slides.md --executable-path "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"`
 
-Ein Build enthält standardmäßig die Sprechernotizen und, falls lokal vorhanden, das Logo. Vor einer Veröffentlichung des Builds, etwa auf GitHub Pages, deshalb die offene Logo-Freigabe beachten. Die Lizenzhinweise für Schriften und übernommenen Code legt der Build unter `lizenzen/` ab.
+Ein Build enthält standardmäßig die Sprechernotizen und, falls lokal vorhanden, das Logo. Vor einer Veröffentlichung des Builds, etwa auf GitHub Pages, deshalb die offene Logo-Freigabe beachten. Die Lizenz des Themes und die Lizenzhinweise für Schriften, Icons und übernommenen Code legt der Build unter `lizenzen/` ab.
 
 ## Die Prüfung
 
@@ -209,4 +209,4 @@ Die Gestaltung folgt der Website der Hochschule, weil keine öffentliche Gestalt
 
 ## Lizenz
 
-Noch nicht festgelegt, siehe offenen Punkt 4 in [docs/quellen.md](docs/quellen.md). Bis dahin räumt das Repository keine Nutzungsrechte ein. Übernommene Teile Dritter und die Lizenzen der Schriften und Icons stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Code, Konfiguration und Dokumentation dieses Repositorys stehen unter der [MIT-Lizenz](LICENSE). Sie räumt keine Rechte an Name, Logo, Claim oder anderen Kennzeichen der Hochschule Hof ein; das Logo ist ohnehin nicht im Repository enthalten, siehe [docs/quellen.md](docs/quellen.md). Die Schriften stehen unter der SIL Open Font License. Übernommene Teile Dritter und die Lizenzen der Schriften und Icons stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

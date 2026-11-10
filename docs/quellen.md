@@ -1,12 +1,13 @@
 # Quellen, Rechte und Annahmen
 
-Stand: 9. November 2026. Dieses Dokument hält fest, woher Gestaltung, Logo und Schriften des Templates stammen, was zu den Nutzungsrechten bekannt ist, welche Annahmen getroffen wurden und was noch offen ist. Es ist keine Rechtsberatung. Mit der Hochschule wurde noch nicht gesprochen.
+Stand: 10. November 2026. Dieses Dokument hält fest, woher Gestaltung, Logo und Schriften des Templates stammen, was zu den Nutzungsrechten bekannt ist, welche Annahmen getroffen wurden und was noch offen ist. Es ist keine Rechtsberatung. Mit der Hochschule wurde noch nicht gesprochen.
 
 ## Kurzfassung
 
 - Das Template ist **inoffiziell**. Die Hochschule Hof hat es weder beauftragt noch freigegeben.
 - Eine öffentliche Gestaltungsrichtlinie der Hochschule war nicht zu finden. Die Gestaltung folgt deshalb der **Website www.hof-university.de**, gemessen an Stylesheet und Darstellung.
 - Das **Logo liegt nicht im Repository**. Für eine Weitergabe der Logodatei in einem öffentlichen Repository fand sich keine Erlaubnis. Das Theme zeigt ein lokal abgelegtes Logo an, sonst einen Platzhalter.
+- Code, Konfiguration und Dokumentation stehen unter der **MIT-Lizenz** (`LICENSE`). Name, Logo, Claim und andere Kennzeichen der Hochschule sind davon ausgenommen.
 - Die Schriften Sora und Source Sans 3 stehen unter der SIL Open Font License 1.1 und liegen dem Theme bei.
 - Teile der Theme-Mechanik und der Prüfregeln sind aus dem Miragon Slidev Deck Template übernommen (MIT-Lizenz, siehe `THIRD_PARTY_NOTICES.md`). Gestalterisch ist nichts davon übernommen.
 
@@ -159,7 +160,7 @@ Damit gilt für die drei Fälle:
 |---|---|---|---|
 | Logo auf Folien in der Lehre zeigen | keine Aussage | keine Aussage | offen |
 | Logodatei in einem öffentlichen GitHub-Repository weitergeben | keine Aussage | keine Aussage | offen, daher nicht eingecheckt |
-| Repository mit Logo unter eine Open-Source-Lizenz stellen | keine Aussage | keine Aussage | offen, daher keine Lizenz gesetzt |
+| Repository mit Logo unter eine Open-Source-Lizenz stellen | keine Aussage | keine Aussage | offen; das Repository steht ohne Logo unter der MIT-Lizenz |
 
 Ansprechpartnerin ist die Hochschulkommunikation (Team Marketing und Design). Die Pressemitteilungen nennen als Kontakt `pressestelle@hof-university.de`.
 
@@ -191,7 +192,7 @@ Die Website nutzt „Source Sans Pro“ in Version 18. Source Sans 3 ist der Nac
 1. **Logo-Freigabe einholen.** Schriftlich bei der Hochschulkommunikation klären, ob das Logo (a) auf Folien gezeigt, (b) als Datei in einem öffentlichen Repository weitergegeben und (c) in einem Repository unter Open-Source-Lizenz geführt werden darf. Aus der Antwort muss hervorgehen, wer für die Hochschule entscheidet.
 2. **Styleguide und Präsentationsvorlage anfordern** und das Template damit abgleichen: Logovarianten, Schutzraum, Mindestgröße, verbindliche Farben, Schriften.
 3. **Freigegebene Logodateien anfordern:** SVG oder EPS mit Schutzraum, Fassung für dunkle und farbige Flächen, verbindliche Farbfassung, gegebenenfalls englische Wortmarke.
-4. **Lizenz des Repositorys festlegen.** Vorschlag nach Rücksprache: Code und Konfiguration unter einer offenen Lizenz, Logo, Claim und Kennzeichen der Hochschule ausdrücklich ausgenommen, Schriften unter der OFL.
+4. **Lizenz des Repositorys:** erledigt am 10. November 2026. Code, Konfiguration und Dokumentation stehen unter der MIT-Lizenz (`LICENSE`). Name, Logo, Claim und andere Kennzeichen der Hochschule sind ausgenommen, die Schriften bleiben unter der OFL.
 5. **Claim klären,** falls er auf Folien erscheinen soll.
 6. **Markenrechtliche Prüfung** im deutschen Register, falls nötig.
 7. **Kennzeichnung:** Das Template bleibt als inoffiziell gekennzeichnet, bis die Hochschule zustimmt.

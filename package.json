@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "description": "Slidev-Theme und Beispielfoliensatz im Erscheinungsbild der Website der Hochschule Hof. Inoffiziell, Logo nur nach Freigabe.",
+  "license": "MIT",
   "keywords": [
     "slidev-theme",
     "slidev"

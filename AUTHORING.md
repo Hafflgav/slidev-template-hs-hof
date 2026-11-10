@@ -97,4 +97,4 @@ vorname.nachname@hof-university.de
 
 - Das Hochschullogo einchecken, solange keine Freigabe vorliegt.
 - Farben erfinden oder aus anderen Quellen übernehmen.
-- Ohne Rücksprache veröffentlichen (`npm publish`), `private` entfernen oder eine Lizenz festlegen.
+- Ohne Rücksprache veröffentlichen (`npm publish`), `private` entfernen oder eine Lizenz festlegen oder ändern.

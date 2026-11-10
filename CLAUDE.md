@@ -12,4 +12,4 @@ Dieses Repository ist das Slidev-Theme `slidev-theme-hs-hof` (Wurzelverzeichnis)
 - Jedes Layout braucht eine Demo-Folie mit vollständigem Hinweisblock; neue Layouts in `AUTHORING.md` und `README.md` aufnehmen.
 - `deck/brand/` bleibt lokal. Das Hochschullogo nie einchecken, auch nicht in Exporten oder Bildschirmfotos. `docs/vorschau.png` nur mit `npm run vorschau:bild` neu erzeugen; das Skript legt `deck/brand` für die Aufnahme beiseite, damit das Bild den Platzhalter zeigt.
 - Vor dem Abschluss: `npm run check`, `npm run build` und die betroffenen Folien mit `npm run vorschau -- --range N` aus `.slidev/vorschau/` ansehen.
-- Nur auf ausdrücklichen Auftrag: `npm publish`, `private` entfernen, Lizenz festlegen, Tags setzen, pushen.
+- Nur auf ausdrücklichen Auftrag: `npm publish`, `private` entfernen, Lizenz ändern, Tags setzen, pushen.
