@@ -14,9 +14,12 @@ withDefaults(defineProps<{
          des Fotos. Vorbild für die gelbe Fläche ist die Kontaktkarte auf der
          Fakultätsseite Informatik. -->
     <div class="closing__motif">
-      <div class="closing__panel hof-plane hof-color-yellow hof-prose">
-        <p class="hof-kicker">{{ contactLabel }}</p>
-        <slot name="contact" />
+      <!-- Ohne ::contact:: bleibt die Fläche als Motiv stehen, aber ohne Beschriftung. -->
+      <div class="closing__panel hof-plane hof-color-yellow hof-prose" :aria-hidden="$slots.contact ? undefined : 'true'">
+        <template v-if="$slots.contact">
+          <p class="hof-kicker">{{ contactLabel }}</p>
+          <slot name="contact" />
+        </template>
       </div>
       <div class="closing__bar hof-plane hof-color-green" aria-hidden="true" />
       <div class="closing__square hof-plane hof-color-red hof-multiply" aria-hidden="true" />

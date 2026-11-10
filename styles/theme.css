@@ -3,7 +3,8 @@
  *
  * Quelle: Stylesheet und Darstellung von www.hof-university.de, gemessen am
  * 2026-11-08. Herkunft, Annahmen und offene Punkte stehen in docs/quellen.md.
- * Farbwerte stehen nur hier und in setup/mermaid.ts, das Literale braucht.
+ * Farbwerte stehen nur hier sowie in setup/mermaid.ts und setup/shiki.ts, die
+ * Literale brauchen und diese Werte spiegeln.
  */
 :root {
   --hof-black: #000000;
@@ -56,6 +57,12 @@
   background: var(--hof-plane);
   color: var(--hof-on-plane);
 }
+
+/* Grauer Nebentext wie Bildquellen hat auf den kräftigen Flächen zu wenig
+   Kontrast (Grün 3,9, Rot 1,6, Blau 1,5); dort nimmt er die Textfarbe der
+   Fläche an. Nur auf .hof-plane: hero und section färben nur die Überschrift. */
+.hof-plane:is(.hof-color-yellow, .hof-color-green, .hof-color-red, .hof-color-blue) { --hof-text-muted: var(--hof-on-plane); }
+.hof-plane.hof-color-soft { --hof-text-muted: var(--hof-ink-rule); }
 
 /* Die Website lässt farbige Flächen multiplizierend überlappen. */
 .hof-multiply { mix-blend-mode: multiply; }

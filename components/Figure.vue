@@ -1,21 +1,25 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { withBase } from '../utils/withBase'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   src: string
   alt?: string
   caption?: string
   source?: string
   /** Höchste Bildhöhe; darüber wird das Bild verkleinert statt unter die Fußzeile zu laufen. */
-  height?: string
+  height?: string | number
 }>(), {
   height: '300px',
 })
+
+// Eine Zahl ohne Einheit gilt als px, wie beim height-Attribut von <img>.
+const maxHeight = computed(() => (/^\d+(?:\.\d+)?$/.test(String(props.height).trim()) ? `${String(props.height).trim()}px` : String(props.height)))
 </script>
 
 <template>
   <figure class="hof-figure">
-    <img :src="withBase(src)" :alt="alt ?? ''" :style="{ maxHeight: height }">
+    <img :src="withBase(src)" :alt="alt ?? ''" :style="{ maxHeight }">
     <figcaption v-if="caption || source">
       <span v-if="caption">{{ caption }}</span>
       <span v-if="source" class="hof-figure__source">Quelle: {{ source }}</span>
