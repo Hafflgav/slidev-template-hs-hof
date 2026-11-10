@@ -131,6 +131,42 @@ const d = 4
 ````
 
 ---
+layout: content
+---
+
+# Formeln, Trennlinien, Beispiel im Beispiel
+
+- a
+- b
+- c
+$$
+x^2
+$$
+
+- d
+- e
+- f
+
+***
+
+- g
+- h
+- i
+
+- ```html
+  <div>Codeblock in der Zeile des Listenpunkts</div>
+  ```
+
+```md
+- Schritt
+
+    ```bash
+    npm ci
+    ```
+<div>gehört noch zum Beispiel</div>
+```
+
+---
 layout: interactive
 icon: i-lucide-pencil
 ---

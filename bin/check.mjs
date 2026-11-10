@@ -25,10 +25,12 @@ const hint = report(hints)
 // nicht als Folieninhalt. Sie werden durch Leerzeichen ersetzt, damit
 // Zeilennummern stimmen.
 const blank = (text, re) => text.replace(re, m => m.replace(/[^\n]/g, ' '))
-// Codeblock mit Zaun (1, 2), Infotext (3) und Inhalt (4). Der schließende Zaun
-// nutzt dasselbe Zeichen und ist mindestens so lang. matchAll findet nur Blöcke
-// auf oberster Ebene; ein Block in einem ````md-Beispiel bleibt Inhalt.
-const FENCE = /^[ \t]*(([`~])\2{2,})[ \t]*([^\n]*)\n([\s\S]*?)^[ \t]*\1\2*[ \t]*$/gm
+// Codeblock mit Einrückung (1), Zaun (2, 3), Infotext (4) und Inhalt (5). Ein
+// Listenzeichen vor dem Zaun, wie in "- ```bash", zählt zur Einrückung. Der
+// schließende Zaun nutzt dasselbe Zeichen, ist mindestens so lang und höchstens
+// drei Spalten tiefer eingerückt; ein tieferer ist Inhalt. matchAll findet nur
+// Blöcke auf oberster Ebene; ein Block in einem ````md-Beispiel bleibt Inhalt.
+const FENCE = /^([ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?)(([`~])\3{2,})[ \t]*([^\n]*)\n([\s\S]*?)^\1? {0,3}\2\3*[ \t]*$/gm
 const sanitize = src => blank(blank(blank(src, FENCE), /<!--[\s\S]*?-->/g), /`[^`\n]*`/g)
 const lineOf = (text, index) => text.slice(0, index).split('\n').length
 const names = (dir, re) => (existsSync(dir) ? readdirSync(dir).filter(f => re.test(f)).map(f => basename(f).replace(re, '')) : [])
@@ -243,9 +245,9 @@ for (const file of Object.keys(data.markdownFiles)) {
 
   // Mermaid übernimmt Farben aus style, classDef, linkStyle und init-Direktiven.
   for (const m of raw.matchAll(FENCE)) {
-    if (!/^mermaid\b/.test(m[3]))
+    if (!/^mermaid\b/.test(m[4]))
       continue
-    m[4].split('\n').forEach((line, i) => {
+    m[5].split('\n').forEach((line, i) => {
       if ((/^\s*(?:style|classDef|linkStyle)\b/.test(line) || line.includes('%%{')) && (COLOR_LITERAL.test(line) || /\b(?:fill|stroke|color|background)\s*:/i.test(line)))
         error(file, lineOf(raw, m.index) + 1 + i, 'no-hardcoded-color', 'Farben in Mermaid-Diagrammen kommen aus dem Theme (setup/mermaid.ts)')
     })
@@ -306,24 +308,26 @@ for (const slide of data.slides) {
   // Punkte je Liste, nach CommonMark: Ein Punkt links vom Inhalt des offenen
   // Punkts ist ein weiterer Punkt derselben Liste, einer darunter ein Unterpunkt.
   // Eingerückte Zeilen und direkt anschließender Text gehören zum offenen Punkt,
-  // Leerzeilen zwischen Punkten trennen die Liste nicht, ein Codeblock links
-  // vom Inhalt beendet sie.
+  // Leerzeilen zwischen Punkten trennen die Liste nicht. Trennlinien sowie Code-
+  // und Formelblöcke ($$) links vom Inhalt beenden sie.
   const listLimit = LIST_LIMIT[layout] ?? DEFAULT_LIST_LIMIT
-  const fences = new Map([...raw.matchAll(FENCE)].map(m => [lineOf(raw, m.index) - 1, m[0].length - m[0].trimStart().length]))
+  const fences = new Map([...raw.matchAll(FENCE)].map(m => [lineOf(raw, m.index) - 1, m[1].length]))
   let run = 0
   let offset = 0
   let gap = false
   let nested = false
   content.split('\n').concat('#').forEach((line, i) => {
     const indent = line.length - line.trimStart().length
-    const fenceEnds = fences.has(i) && fences.get(i) < offset
-    const empty = !line.trim() && !fenceEnds
-    const item = line.match(/^ {0,3}(?:[-*+]|\d+[.)])[ \t]+/)
+    const rule = /^ {0,3}([-*_])(?:[ \t]*\1){2,}[ \t]*$/.test(line)
+    // Zaunzeilen sind in content nur Leerzeichen; ihre Einrückung steht in fences.
+    const block = rule || (fences.has(i) ? fences.get(i) < offset : indent < offset && /^ {0,3}\$\$/.test(line))
+    const empty = !line.trim() && !block
+    const item = !rule && line.match(/^ {0,3}(?:[-*+]|\d+[.)])[ \t]+/)
     if (item && (!run || indent < offset)) {
       run++
       offset = item[0].length
     }
-    else if (run && !empty && !fenceEnds && (indent >= offset || (!gap && !/^(?:#|::\w+::|<|\||>)/.test(line)))) {
+    else if (run && !empty && !block && (indent >= offset || (!gap && !/^(?:#|::\w+::|<|\||>)/.test(line)))) {
       nested ||= indent >= offset && LIST_ITEM.test(line.trimStart())
     }
     else if (!empty) {
@@ -339,16 +343,16 @@ for (const slide of data.slides) {
 
   const lineLimit = CODE_LINE_LIMIT[layout] ?? DEFAULT_CODE_LINE_LIMIT
   for (const m of raw.matchAll(FENCE)) {
-    const info = m[3]
-    const lines = m[4].split('\n').slice(0, -1)
+    const info = m[4]
+    const lines = m[5].split('\n').slice(0, -1)
     if (/^mermaid\b/.test(info)) {
-      const slices = /^\s*pie\b/m.test(m[4]) ? lines.filter(l => /^\s*"[^"]*"\s*:\s*[\d.]+/.test(l)).length : 0
+      const slices = /^\s*pie\b/m.test(m[5]) ? lines.filter(l => /^\s*"[^"]*"\s*:\s*[\d.]+/.test(l)).length : 0
       if (slices > PIE_LIMIT)
         hint(...at(slide), 'pie-slices', `Tortendiagramm mit ${slices} Segmenten; das Theme hat Farben für ${PIE_LIMIT}, weitere sind kaum zu unterscheiden`)
       continue
     }
     // Magic Move zeigt jeden inneren Codeblock als eigenen Schritt.
-    const steps = /^(?:md|markdown) magic-move\b/.test(info) ? [...m[4].matchAll(FENCE)].map(s => s[4].split('\n').slice(0, -1)) : [lines]
+    const steps = /^(?:md|markdown) magic-move\b/.test(info) ? [...m[5].matchAll(FENCE)].map(s => s[5].split('\n').slice(0, -1)) : [lines]
     const tallest = Math.max(0, ...steps.map(s => s.length))
     if (tallest > CODE_LIMIT)
       hint(...at(slide), 'code-length', `Codeblock mit ${tallest} Zeilen; ab ${CODE_LIMIT + 1} läuft er unter die Fußzeile`)
