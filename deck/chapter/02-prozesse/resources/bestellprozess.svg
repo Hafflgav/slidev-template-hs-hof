@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 280" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#000000">
+  <title>Bestellprozess in BPMN</title>
+  <defs>
+    <marker id="pfeil" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#000000"/>
+    </marker>
+  </defs>
+
+  <g fill="none" stroke="#000000" stroke-width="2" marker-end="url(#pfeil)">
+    <path d="M58,140 H100"/>
+    <path d="M240,140 H290"/>
+    <path d="M315,115 V70 H390"/>
+    <path d="M315,165 V210 H390"/>
+    <path d="M530,70 H580"/>
+    <path d="M530,210 H580"/>
+  </g>
+
+  <circle cx="40" cy="140" r="18" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+  <text x="40" y="180" text-anchor="middle" font-size="13">Bestellung</text>
+  <text x="40" y="196" text-anchor="middle" font-size="13">eingegangen</text>
+
+  <rect x="100" y="105" width="140" height="70" rx="10" fill="#F0F5F8" stroke="#000000" stroke-width="2"/>
+  <text x="170" y="136" text-anchor="middle">Bestellung</text>
+  <text x="170" y="154" text-anchor="middle">prüfen</text>
+
+  <path d="M315,115 L340,140 L315,165 L290,140 Z" fill="#FFFFFF" stroke="#000000" stroke-width="2"/>
+  <path d="M306,131 L324,149 M324,131 L306,149" stroke="#000000" stroke-width="3"/>
+  <text x="250" y="96" text-anchor="middle" font-size="13">Ware verfügbar?</text>
+  <text x="330" y="62" font-size="13">ja</text>
+  <text x="330" y="230" font-size="13">nein</text>
+
+  <rect x="390" y="35" width="140" height="70" rx="10" fill="#F0F5F8" stroke="#000000" stroke-width="2"/>
+  <text x="460" y="66" text-anchor="middle">Ware</text>
+  <text x="460" y="84" text-anchor="middle">versenden</text>
+
+  <rect x="390" y="175" width="140" height="70" rx="10" fill="#F0F5F8" stroke="#000000" stroke-width="2"/>
+  <text x="460" y="206" text-anchor="middle">Kundschaft</text>
+  <text x="460" y="224" text-anchor="middle">informieren</text>
+
+  <circle cx="598" cy="70" r="18" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+  <text x="598" y="110" text-anchor="middle" font-size="13">Bestellung</text>
+  <text x="598" y="126" text-anchor="middle" font-size="13">versendet</text>
+
+  <circle cx="598" cy="210" r="18" fill="#FFFFFF" stroke="#000000" stroke-width="4"/>
+  <text x="598" y="250" text-anchor="middle" font-size="13">Kundschaft</text>
+  <text x="598" y="266" text-anchor="middle" font-size="13">informiert</text>
+</svg>
