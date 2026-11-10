@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # Chromium braucht nur der PDF-Export, nicht der Build.
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+
+      # Erkennt eingecheckte Logos und Exporte nur nachträglich; npm run check
+      # sucht zusätzlich nach Kopien der Logodatei im ganzen Repository.
+      - name: Kein Hochschullogo und keine Exporte im Repository, solange die Freigabe fehlt
+        run: test -z "$(git ls-files deck/brand '*-export*' 'folien*.pdf')"
+
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+
+      - name: Theme in einem frischen Foliensatz installieren und bauen
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
+          npm init -y > /dev/null
+          npm install -D -E "@slidev/cli@$(node -p "require('$GITHUB_WORKSPACE/package.json').devDependencies['@slidev/cli']")" "$RUNNER_TEMP"/slidev-theme-hs-hof-*.tgz
+          printf -- '---\ntheme: hs-hof\nlayout: cover\n---\n\n# Probe\n' > slides.md
+          npx hof-slides-check slides.md
+          npx slidev build slides.md
