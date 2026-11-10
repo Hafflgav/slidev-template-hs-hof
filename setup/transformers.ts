@@ -8,8 +8,11 @@ const BODY_TAGS = ['Card', 'Step']
 const ATTRS = String.raw`((?:\s+[^\s=>"'/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>"']+))?)*)`
 const SINGLE_LINE = new RegExp(String.raw`^([ \t]*)<(${BODY_TAGS.join('|')})${ATTRS}\s*>(.*)</\2>[ \t]*$`)
 // Ein Codeblock endet erst an einem Zaun aus demselben Zeichen, mindestens so
-// lang wie der öffnende und ohne Infotext. Backticks im Infotext öffnen keinen.
-const FENCE = /^[ \t]*(`{3,}|~{3,})(.*)$/
+// lang wie der öffnende, ohne Infotext und höchstens drei Spalten tiefer
+// eingerückt; sonst ist die Zeile Inhalt, etwa ein Beispiel im Beispiel.
+// Backticks im Infotext öffnen keinen Codeblock. Ein Listenzeichen davor, wie
+// in "- ```bash", zählt als Einrückung.
+const FENCE = /^([ \t]*(?:(?:[-*+]|\d+[.)])[ \t]+)?)(`{3,}|~{3,})(.*)$/
 
 // Ab vier Spalten Einrückung würde der Body nach einer Leerzeile zum Codeblock.
 const columns = (indent: string) => [...indent].reduce((col, ch) => (ch === '\t' ? col + 4 - (col % 4) : col + 1), 0)
@@ -20,15 +23,17 @@ function wrapComponentBody(ctx: { s: { original: string, overwrite: (start: numb
     return
   const lines = source.split('\n')
   let fence = ''
+  let fenceColumns = 0
   let changed = false
   for (let i = 0; i < lines.length; i++) {
     const marker = lines[i].match(FENCE)
-    if (!fence && marker && !(marker[1][0] === '`' && marker[2].includes('`'))) {
-      fence = marker[1]
+    if (!fence && marker && !(marker[2][0] === '`' && marker[3].includes('`'))) {
+      fence = marker[2]
+      fenceColumns = columns(marker[1])
       continue
     }
     if (fence) {
-      if (marker && marker[1][0] === fence[0] && marker[1].length >= fence.length && !marker[2].trim())
+      if (marker && marker[2][0] === fence[0] && marker[2].length >= fence.length && !marker[3].trim() && columns(marker[1]) < fenceColumns + 4)
         fence = ''
       continue
     }

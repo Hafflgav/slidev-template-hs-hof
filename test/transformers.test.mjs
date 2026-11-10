@@ -64,4 +64,16 @@ test('beendet einen Codeblock nur am passenden Zaun', () => {
     run('```js\nx\n````\n<Card title="A">Text.</Card>'),
     '```js\nx\n````\n<Card title="A">\n\nText.\n\n</Card>',
   )
+  // Ein Zaun mit vier Spalten mehr Einrückung ist Inhalt, kein Ende.
+  const nested = '```md\n- Schritt\n\n    ```bash\n    npm ci\n    ```\n<Card title="A">Im Beispiel.</Card>\n```'
+  assert.equal(
+    run(`${nested}\n<Card title="B">Danach.</Card>`),
+    `${nested}\n<Card title="B">\n\nDanach.\n\n</Card>`,
+  )
+  // Ein Zaun direkt hinter dem Listenzeichen öffnet ebenfalls einen Codeblock.
+  const inItem = '- ```md\n  <Card title="A">Im Beispiel.</Card>\n  ```'
+  assert.equal(
+    run(`${inItem}\n\n<Card title="B">Danach.</Card>`),
+    `${inItem}\n\n<Card title="B">\n\nDanach.\n\n</Card>`,
+  )
 })
