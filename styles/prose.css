@@ -1,0 +1,112 @@
+/*
+ * Gemeinsame Geometrie und Typografie aller Layouts. Alle Größen sind feste
+ * Werte, weil die Folie eine 980 px breite, skalierte Fläche ist: vw-Einheiten
+ * würden PDF und Bildschirm unterschiedlich aussehen lassen.
+ */
+.hof-slide {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  padding: 40px 56px 56px;
+  overflow: hidden;
+  background: var(--hof-surface);
+  color: var(--hof-text);
+  /* Kurze Wörter wandern in die nächste Zeile, nur lange Komposita werden getrennt. */
+  hyphenate-limit-chars: 10 4 4;
+}
+
+/* Überzeile und Titel enden vor dem Logo in der rechten oberen Ecke. */
+.hof-kicker {
+  max-width: 740px;
+  margin: 0 0 8px;
+  font: 400 18px/27px var(--hof-font-body);
+  text-transform: uppercase;
+}
+
+.hof-prose h1 {
+  max-width: 740px;
+  margin: 0 0 20px;
+  font: 400 28px/36px var(--hof-font-heading);
+  overflow-wrap: break-word;
+}
+
+.hof-prose h2 {
+  margin: 20px 0 8px;
+  font: 400 22px/30px var(--hof-font-heading);
+}
+
+.hof-prose h3 {
+  margin: 16px 0 6px;
+  font: 400 20px/28px var(--hof-font-heading);
+}
+
+.hof-prose p,
+.hof-prose li {
+  font: 400 18px/27px var(--hof-font-body);
+}
+
+.hof-prose p {
+  margin: 0 0 12px;
+}
+
+.hof-prose ul,
+.hof-prose ol {
+  margin: 0 0 12px;
+  padding-left: 1.25em;
+}
+
+.hof-prose ul {
+  list-style: disc;
+}
+
+.hof-prose ol {
+  list-style: decimal;
+}
+
+.hof-prose li + li {
+  margin-top: 6px;
+}
+
+.hof-prose strong {
+  font-weight: 700;
+}
+
+.hof-prose blockquote {
+  margin: 0 0 12px;
+  padding: 16px 20px;
+  background: var(--hof-panel);
+  font: 400 20px/30px var(--hof-font-body);
+}
+
+.hof-prose blockquote p {
+  margin: 0;
+  font: inherit;
+}
+
+.hof-prose a[href] {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.hof-prose a[href]:hover {
+  text-decoration: underline;
+}
+
+.hof-prose a[href]::after {
+  content: '';
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  margin-left: 0.25em;
+  vertical-align: -0.08em;
+  background: currentColor;
+  -webkit-mask: var(--hof-arrow) center / contain no-repeat;
+  mask: var(--hof-arrow) center / contain no-repeat;
+}
+
+/* Mailadressen sind Kontaktdaten, kein Weiterlesen: ohne Pfeil. */
+.hof-prose a[href^='mailto:']::after {
+  content: none;
+}

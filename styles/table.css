@@ -1,0 +1,22 @@
+/* Markdown-Tabellen, auch in der Vorschau des Präsentationsmodus und im Export. */
+.slidev-page .hof-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  font: 400 16px/24px var(--hof-font-body);
+}
+
+.slidev-page .hof-prose :is(th, td) {
+  padding: 8px 12px;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
+.slidev-page .hof-prose th {
+  background: var(--hof-panel);
+  font: 400 16px/24px var(--hof-font-heading);
+  text-align: left;
+}
+
+.slidev-page .hof-prose td {
+  border-bottom: 1px solid var(--hof-ink-rule);
+}

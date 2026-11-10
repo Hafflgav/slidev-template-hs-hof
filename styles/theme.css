@@ -1,0 +1,61 @@
+/*
+ * Farben und Schriften der Hochschule Hof.
+ *
+ * Quelle: Stylesheet und Darstellung von www.hof-university.de, gemessen am
+ * 2026-11-08. Herkunft, Annahmen und offene Punkte stehen in docs/quellen.md.
+ * Farbwerte stehen nur hier und in setup/mermaid.ts, das Literale braucht.
+ */
+:root {
+  --hof-black: #000000;
+  --hof-white: #ffffff;
+  --hof-soft: #f0f5f8;
+  --hof-ink-rule: #575757;
+  --hof-blue: #2962fa;
+  --hof-red: #ee0d1e;
+  --hof-yellow: #fece00;
+  --hof-green: #0bda7d;
+
+  /* Rollen */
+  --hof-text: var(--hof-black);
+  --hof-text-muted: var(--hof-ink-rule);
+  --hof-surface: var(--hof-white);
+  --hof-panel: var(--hof-soft);
+  --hof-accent: var(--hof-blue);
+
+  --hof-font-heading: 'Sora', 'Source Sans 3', ui-sans-serif, sans-serif;
+  --hof-font-body: 'Source Sans 3', 'Source Sans Pro', ui-sans-serif, system-ui, sans-serif;
+  --hof-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Sora hat keinen Pfeil; als Maske sieht er in jeder Schrift gleich aus. */
+  --hof-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12h16M14 6l6 6-6 6'/%3E%3C/svg%3E");
+
+  --slidev-theme-primary: var(--hof-blue);
+  --slidev-code-font-family: var(--hof-font-mono);
+}
+
+/*
+ * Farbflächen: Text- und Flächenfarbe gehören zusammen, damit jede Kombination
+ * den Kontrast aus docs/quellen.md einhält (Schwarz auf Gelb, Grün und Rot,
+ * Weiß auf Blau, wie auf der Website).
+ */
+.hof-color-yellow { --hof-plane: var(--hof-yellow); --hof-on-plane: var(--hof-black); }
+.hof-color-green { --hof-plane: var(--hof-green); --hof-on-plane: var(--hof-black); }
+.hof-color-red { --hof-plane: var(--hof-red); --hof-on-plane: var(--hof-black); }
+.hof-color-blue { --hof-plane: var(--hof-blue); --hof-on-plane: var(--hof-white); }
+.hof-color-soft { --hof-plane: var(--hof-soft); --hof-on-plane: var(--hof-black); }
+
+/* Hintergrund für Inline-Code auf der Fläche: von der Textfarbe weg abgetönt,
+   damit der Kontrast mindestens 4,5 : 1 bleibt (Rot 5,3, Blau 6,4). */
+.hof-color-yellow { --hof-code-bg: color-mix(in srgb, var(--hof-yellow) 88%, var(--hof-black)); }
+.hof-color-green { --hof-code-bg: color-mix(in srgb, var(--hof-green) 88%, var(--hof-black)); }
+.hof-color-red { --hof-code-bg: color-mix(in srgb, var(--hof-red) 85%, var(--hof-white)); }
+.hof-color-blue { --hof-code-bg: color-mix(in srgb, var(--hof-blue) 85%, var(--hof-black)); }
+.hof-color-soft { --hof-code-bg: var(--hof-white); }
+
+.hof-plane {
+  background: var(--hof-plane);
+  color: var(--hof-on-plane);
+}
+
+/* Die Website lässt farbige Flächen multiplizierend überlappen. */
+.hof-multiply { mix-blend-mode: multiply; }

@@ -1,0 +1,14 @@
+/* Einstieg, den Slidev automatisch lädt. Tokens nie in scoped Styles setzen. */
+@import './theme.css';
+@import './fonts.css';
+@import './prose.css';
+@import './code.css';
+@import './table.css';
+
+html,
+body,
+#app,
+#page-root,
+.slidev-layout {
+  font-family: var(--hof-font-body);
+}

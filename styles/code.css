@@ -1,0 +1,24 @@
+/* Codeblöcke und Inline-Code. Slidev setzt Abstand und Größe mit !important.
+   Die Syntaxfarben kommen aus setup/shiki.ts. */
+.slidev-code,
+.slidev-layout pre.slidev-code {
+  padding: 16px 20px !important;
+  border-radius: 0 !important;
+  background: var(--hof-panel) !important;
+  font-size: 15px !important;
+  line-height: 23px !important;
+}
+
+.hof-prose :not(pre) > code {
+  padding: 1px 5px;
+  background: var(--hof-panel);
+  font-family: var(--hof-font-mono);
+  font-size: 0.88em;
+}
+
+/* Auf Farbflächen eine zur Fläche passende Abtönung, die den Kontrast hält
+   (Werte in styles/theme.css). */
+.hof-plane :not(pre) > code,
+:is(.section, .hero) h1 code {
+  background: var(--hof-code-bg);
+}
