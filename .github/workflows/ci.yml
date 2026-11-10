@@ -37,13 +37,16 @@ jobs:
       - run: npm test
       - run: npm run build
 
+      # Wie in der README: Pfad statt Kurzname, Prüfung über prebuild. Slidev baut
+      # auch ohne Theme fehlerfrei, deshalb zum Schluss die Theme-Styles im Build suchen.
       - name: Theme in einem frischen Foliensatz installieren und bauen
         run: |
           npm pack --pack-destination "$RUNNER_TEMP"
           mkdir "$RUNNER_TEMP/consumer"
           cd "$RUNNER_TEMP/consumer"
           npm init -y > /dev/null
+          npm pkg set scripts.prebuild="npm run check" scripts.build="slidev build slides.md" scripts.check="hof-slides-check slides.md"
           npm install -D -E "@slidev/cli@$(node -p "require('$GITHUB_WORKSPACE/package.json').devDependencies['@slidev/cli']")" "$RUNNER_TEMP"/slidev-theme-hs-hof-*.tgz
-          printf -- '---\ntheme: hs-hof\nlayout: cover\n---\n\n# Probe\n' > slides.md
-          npx hof-slides-check slides.md
-          npx slidev build slides.md
+          printf -- '---\ntheme: ./node_modules/slidev-theme-hs-hof\nlayout: cover\n---\n\n# Probe\n' > slides.md
+          npm run build
+          grep -q -- '--hof-blue' dist/assets/*.css
