@@ -1,0 +1,79 @@
+{
+  "name": "slidev-theme-hs-hof",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Slidev-Theme und Beispielfoliensatz im Erscheinungsbild der Website der Hochschule Hof. Inoffiziell, Logo nur nach Freigabe.",
+  "keywords": [
+    "slidev-theme",
+    "slidev"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hafflgav/slidev-template-hs-hof.git"
+  },
+  "engines": {
+    "node": ">=22.22.0",
+    "slidev": ">=53.1.0 <54"
+  },
+  "slidev": {
+    "colorSchema": "light",
+    "highlighter": "shiki",
+    "defaults": {
+      "fonts": {
+        "sans": "Source Sans 3",
+        "serif": "Sora",
+        "provider": "none"
+      },
+      "favicon": "",
+      "titleTemplate": "%s",
+      "htmlAttrs": {
+        "lang": "de"
+      }
+    }
+  },
+  "bin": {
+    "hof-slides-check": "bin/check.mjs"
+  },
+  "files": [
+    "layouts",
+    "components",
+    "composables",
+    "utils",
+    "global",
+    "styles",
+    "setup",
+    "assets",
+    "bin",
+    "deck/slides.md",
+    "deck/chapter",
+    "global-top.vue",
+    "AUTHORING.md",
+    "THIRD_PARTY_NOTICES.md",
+    "docs/quellen.md"
+  ],
+  "scripts": {
+    "dev": "slidev deck/slides.md --open",
+    "build": "slidev build deck/slides.md",
+    "export": "slidev export deck/slides.md --output folien.pdf",
+    "export:klicks": "slidev export deck/slides.md --with-clicks --output folien-klicks.pdf",
+    "vorschau": "slidev export deck/slides.md --format png --output .slidev/vorschau",
+    "check": "node bin/check.mjs deck/slides.md --self",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "1.2.152",
+    "@slidev/parser": "53.1.0"
+  },
+  "peerDependencies": {
+    "@slidev/cli": ">=53.1.0 <54"
+  },
+  "devDependencies": {
+    "@slidev/cli": "53.1.0",
+    "playwright-chromium": "1.64.1"
+  },
+  "allowScripts": {
+    "playwright-chromium": true,
+    "fsevents": false
+  }
+}

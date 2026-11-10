@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.slidev/
+*.log
+*.tgz
+.DS_Store
+
+# PDF- und PNG-Exporte (Slidev nennt sie ohne --output slides-export*)
+/folien.pdf
+/folien-klicks.pdf
+*-export/
+*-export.*
+
+# Logo der Hochschule: ohne schriftliche Freigabe nicht in dieses öffentliche
+# Repository (siehe docs/quellen.md, offene Punkte).
+deck/brand/
