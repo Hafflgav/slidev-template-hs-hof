@@ -1,0 +1,17 @@
+{
+  "hinweis": "Das Logo liegt nicht im Repository. Diese Datei hält fest, welche lokal unter deck/brand/ abgelegte Logodatei woher stammt. npm run check vergleicht die Prüfsumme.",
+  "dateien": [
+    {
+      "datei": "deck/brand/logo.svg",
+      "sha256": "056a93489cdabd3e13e2f0009e7c882add5d6c1fe65a700062bb375560ef12b1",
+      "inhalt": "Vollständiges Logo der Hochschule Hof (Bildmarke und Wortmarke, deutsch), Bildschirmfarben",
+      "quelle": "https://www.hof-university.de/fileadmin/user_upload/hochschulkommunikation/2026-10_flyer_a5_kommunikationsdesign_digital.pdf",
+      "quelle_sha256": "f9ece051f1931a2f6c6d149068d073d0774c084fa546c965d568810f1c2b59b6",
+      "gefunden_auf": "https://www.hof-university.de/studium/studiengaenge-und-weiterbildungs-programme/studiengaenge/kommunikationsdesign-ba.html",
+      "abgerufen": "2026-11-08",
+      "verfahren": "Seite 1 mit pdftocairo -svg in SVG umgewandelt, die 49 Pfade des Logos unverändert in eine eigene SVG-Datei kopiert (scripts/logo-aus-flyer.sh). Nichts neu gezeichnet.",
+      "offiziell_bereitgestellt": false,
+      "rechte": "nicht geklärt, siehe docs/quellen.md"
+    }
+  ]
+}
